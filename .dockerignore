@@ -1,0 +1,13 @@
+.venv
+venv
+__pycache__
+*.pyc
+.git
+.github
+tests
+docs
+data/faiss_index
+.env
+.pytest_cache
+htmlcov
+.coverage

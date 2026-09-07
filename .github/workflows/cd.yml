@@ -1,0 +1,55 @@
+name: CD
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version tag
+        id: version
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/api:${{ steps.version.outputs.tag }}
+            ghcr.io/${{ github.repository }}/api:latest
+
+      - name: Build and push Streamlit image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: streamlit_app/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/ui:${{ steps.version.outputs.tag }}
+            ghcr.io/${{ github.repository }}/ui:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment: production
+    steps:
+      - name: Deploy notice
+        run: |
+          echo "Deployment step is a placeholder — wire this to your target platform"
+          echo "(e.g. kubectl apply, docker compose pull && up -d over SSH, or a PaaS CLI)."
