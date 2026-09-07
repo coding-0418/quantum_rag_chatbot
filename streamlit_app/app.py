@@ -14,6 +14,7 @@ if "history" not in st.session_state:
 
 with st.sidebar:
     st.header("Ingest a document")
+    pdf_file = st.file_uploader("PDF file", type=["pdf"])
     title = st.text_input("Title")
     source = st.text_input("Source (URL / citation)")
     content = st.text_area("Content", height=200)
@@ -27,6 +28,18 @@ with st.sidebar:
             st.success(f"Ingested {resp.json()['num_chunks']} chunks")
         else:
             st.error(resp.text)
+    if st.button("Ingest PDF") and pdf_file is not None:
+        try:
+            resp = httpx.post(
+                f"{API_BASE_URL}/api/v1/documents/pdf",
+                files={"file": (pdf_file.name, pdf_file.getvalue(), "application/pdf")},
+                data={"title": title or pdf_file.name, "source": source or pdf_file.name},
+                timeout=120,
+            )
+            resp.raise_for_status()
+            st.success(f"Ingested {resp.json()['num_chunks']} PDF chunks")
+        except httpx.HTTPError as exc:
+            st.error(f"PDF ingestion failed: {exc}")
 
 for role, message in st.session_state.history:
     with st.chat_message(role):
@@ -48,6 +61,12 @@ if query:
                 data = resp.json()
                 answer = data["answer"]
                 st.markdown(answer)
+                if data["citations"]:
+                    st.subheader("Sources")
+                    for citation in data["citations"]:
+                        page = f", page {citation['page_number']}" if citation.get("page_number") else ""
+                        source = citation.get("source") or ""
+                        st.markdown(f"{citation['marker']} **{citation['title']}**{page}  \n{source}")
                 with st.expander("Business summary"):
                     st.markdown(data["business_summary"])
                 with st.expander("Agent trace"):

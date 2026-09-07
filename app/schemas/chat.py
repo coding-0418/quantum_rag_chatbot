@@ -14,6 +14,7 @@ class Citation(BaseModel):
     classical_score: float
     quantum_score: float
     final_score: float
+    page_number: int | None = None
 
 
 class ChatResponse(BaseModel):

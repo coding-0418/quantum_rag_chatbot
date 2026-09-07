@@ -22,13 +22,17 @@ def cite(state: AgentState) -> AgentState:
                 "classical_score": round(chunk.get("classical_score", 0.0), 4),
                 "quantum_score": round(chunk.get("quantum_score", 0.0), 4),
                 "final_score": round(chunk.get("final_score", 0.0), 4),
+                "page_number": chunk["metadata"].get("page_number"),
             }
         )
 
     analysis = state.get("analysis", "")
-    footer = "\n\nSources:\n" + "\n".join(
-        f"{c['marker']} {c['title']} (score: {c['final_score']})" for c in citations
-    )
+    source_lines = []
+    for citation in citations:
+        page = f", page {citation['page_number']}" if citation["page_number"] else ""
+        source = f" - {citation['source']}" if citation["source"] else ""
+        source_lines.append(f"{citation['marker']} {citation['title']}{page}{source}")
+    footer = "\n\nSources:\n" + "\n".join(source_lines)
     state["final_answer"] = analysis + (footer if citations else "")
     state["citations"] = citations
     state.setdefault("trace", []).append({"agent": "citation", "num_citations": len(citations)})

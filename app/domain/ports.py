@@ -15,5 +15,9 @@ class Retriever(Protocol):
     def search(self, query: str, top_k: int = 10) -> list[ChunkResult]: ...
 
 
+class DocumentIngestor(Protocol):
+    def extract_pages(self, source: object) -> list[object]: ...
+
+
 class DocumentRepository(Protocol):
     async def save(self, title: str, source: str, content: str) -> str: ...

@@ -1,13 +1,42 @@
-"""PDF text extraction boundary."""
+"""PDF text extraction using PyMuPDF."""
 
+from dataclasses import dataclass
 from pathlib import Path
+from typing import BinaryIO
+
+
+@dataclass(frozen=True)
+class ExtractedPage:
+    """Text and citation metadata extracted from one PDF page."""
+
+    page_number: int
+    text: str
 
 
 class PDFIngestor:
-    """Extract text from a PDF without coupling callers to pypdf."""
+    """Extract page-aware text from a PDF with PyMuPDF."""
 
-    def extract(self, path: str | Path) -> str:
-        from pypdf import PdfReader
+    def extract_pages(self, source: str | Path | BinaryIO | bytes) -> list[ExtractedPage]:
+        import fitz
 
-        reader = PdfReader(str(path))
-        return "\n".join(page.extract_text() or "" for page in reader.pages).strip()
+        document_source: str | bytes
+        if isinstance(source, (str, Path)):
+            document_source = str(source)
+            document = fitz.open(document_source)
+        else:
+            document_source = source.read() if hasattr(source, "read") else source
+            document = fitz.open(stream=document_source, filetype="pdf")
+
+        try:
+            return [
+                ExtractedPage(page_number=page_number, text=page.get_text("text").strip())
+                for page_number, page in enumerate(document, start=1)
+                if page.get_text("text").strip()
+            ]
+        finally:
+            document.close()
+
+    def extract(self, source: str | Path | BinaryIO | bytes) -> str:
+        """Return all extracted page text for callers that do not need page metadata."""
+
+        return "\n\n".join(page.text for page in self.extract_pages(source))

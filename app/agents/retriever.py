@@ -1,7 +1,7 @@
 """Retriever agent: dense vector search over the FAISS knowledge base."""
 
-from app.rag.embeddings import embed_query
 from app.rag.vector_store import FaissVectorStore
+from app.services.retrieval import RetrievalService
 from app.workflow.state import AgentState, ChunkResult
 
 _store: FaissVectorStore | None = None
@@ -20,12 +20,11 @@ def get_store(dim: int = 384) -> FaissVectorStore:
 
 
 def retrieve(state: AgentState, top_k: int = 8) -> AgentState:
-    store = get_store()
     seen: dict[str, ChunkResult] = {}
+    retrieval_service = RetrievalService(top_k=top_k, store=get_store())
 
     for sub_query in state.get("sub_queries", [state["query"]]):
-        query_vector = embed_query(sub_query)
-        for hit in store.search(query_vector, top_k=top_k):
+        for hit in retrieval_service.search(sub_query):
             existing = seen.get(hit.chunk_id)
             if existing is None or hit.score > existing["classical_score"]:
                 seen[hit.chunk_id] = ChunkResult(
