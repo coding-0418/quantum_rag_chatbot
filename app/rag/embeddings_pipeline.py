@@ -8,4 +8,5 @@ class EmbeddingPipeline:
         self.model_name = model_name
 
     def embed(self, texts: list[str]):
+        # TODO: Inject the embedding model to avoid loading it per process boundary.
         return embed_texts(texts)

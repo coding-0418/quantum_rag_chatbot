@@ -25,6 +25,7 @@ class EvaluationRunner:
         results: list[EvaluationResult] = []
         for case in cases:
             response = self.answerer(case.query)
+            # TODO: Add answer faithfulness and latency metrics to the report.
             sources = {item.get("source", "") for item in response.get("citations", [])}
             expected = set(case.expected_sources)
             recall = len(sources & expected) / len(expected) if expected else 0.0
