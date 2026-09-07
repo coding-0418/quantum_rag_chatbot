@@ -3,6 +3,11 @@
 from app.workflow.state import AgentState
 
 
+class AnalysisAgent:
+    def run(self, state: AgentState) -> AgentState:
+        return analyze(state)
+
+
 def analyze(state: AgentState) -> AgentState:
     chunks = state.get("reranked_chunks", [])
 

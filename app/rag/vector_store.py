@@ -69,3 +69,13 @@ class FaissVectorStore:
                 )
             )
         return results
+
+
+class VectorStore:
+    """Configuration-first vector store facade for dependency injection."""
+
+    def __init__(self, index_path: str | None = None) -> None:
+        self.index_path = index_path
+
+    def open(self, dim: int = 384) -> FaissVectorStore:
+        return FaissVectorStore(dim=dim, index_path=self.index_path)

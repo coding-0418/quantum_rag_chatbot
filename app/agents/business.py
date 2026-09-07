@@ -2,6 +2,11 @@
 
 from app.workflow.state import AgentState
 
+
+class BusinessAgent:
+    def run(self, state: AgentState) -> AgentState:
+        return summarize_for_business(state)
+
 _IMPACT_KEYWORDS = {
     "cost": "cost reduction",
     "risk": "risk mitigation",

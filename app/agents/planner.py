@@ -10,6 +10,11 @@ TOPIC_KEYWORDS = {
 }
 
 
+class PlannerAgent:
+    def run(self, state: AgentState) -> AgentState:
+        return plan(state)
+
+
 def plan(state: AgentState) -> AgentState:
     query = state["query"]
     lower = query.lower()

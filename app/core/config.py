@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     redis_port: int = 6379
     redis_db: int = 0
 
-    faiss_index_path: str = "/app/data/faiss_index/knowledge_base.index"
+    faiss_index_path: str = "data/faiss_index/knowledge_base.index"
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
 
     quantum_backend: str = "aer_simulator"

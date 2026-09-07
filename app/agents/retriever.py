@@ -7,6 +7,11 @@ from app.workflow.state import AgentState, ChunkResult
 _store: FaissVectorStore | None = None
 
 
+class RetrieverAgent:
+    def run(self, state: AgentState) -> AgentState:
+        return retrieve(state)
+
+
 def get_store(dim: int = 384) -> FaissVectorStore:
     global _store
     if _store is None:

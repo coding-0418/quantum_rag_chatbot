@@ -3,6 +3,11 @@
 from app.workflow.state import AgentState
 
 
+class CitationAgent:
+    def run(self, state: AgentState) -> AgentState:
+        return cite(state)
+
+
 def cite(state: AgentState) -> AgentState:
     chunks = state.get("reranked_chunks", [])
 

@@ -5,6 +5,11 @@ from app.rag.quantum.quantum_utils import quantum_rerank_score
 from app.workflow.state import AgentState
 
 
+class QuantumRerankerAgent:
+    def run(self, state: AgentState) -> AgentState:
+        return rerank(state)
+
+
 def rerank(state: AgentState, top_n: int = 5) -> AgentState:
     query_vector = embed_query(state["query"])
     candidates = state.get("retrieved_chunks", [])
